@@ -48,7 +48,9 @@ namespace AutoFB {
         }
 
         private void Button4_Click(object sender, EventArgs e) {
-            web.loginOut();
+            foreach(string temp in web.getGroupList()) {
+                Console.Out.WriteLine(temp + "\n");
+            }
         }
 
         private void Button5_Click(object sender, EventArgs e) {

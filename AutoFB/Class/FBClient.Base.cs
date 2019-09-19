@@ -12,6 +12,7 @@ namespace AutoFB {
         public string userName = "";
         public Boolean isLogin = false;
 
+        
         public Boolean loginFB(string ac, string pw) {
             isLogin = false;
 
@@ -59,7 +60,7 @@ namespace AutoFB {
             }
             string url = regex.Match(response).Groups[1].Value;
 
-            url = "https://m.facebook.com" + urlTransfer(url);
+            url = "https://m.facebook.com" + UrlTransfer(url);
 
             NameValueCollection payload = new NameValueCollection();
             payload.Add("lsd", lsd);
@@ -80,7 +81,7 @@ namespace AutoFB {
                 return false;
             }
             url = regex.Match(response).Groups[1].Value;
-            url = "https://m.facebook.com" + urlTransfer(url);
+            url = "https://m.facebook.com" + UrlTransfer(url);
 
             response = DownloadString(url);
 
@@ -92,6 +93,27 @@ namespace AutoFB {
             isLogin = true;
             //id="mbasic_logout_button">登出（鄭智嘉）</a>
             return true;
+        }
+
+
+        //public List<string> groupList = null;
+
+        public List<string> getGroupList() {
+            string response = DownloadString("https://m.facebook.com/groups/?seemore&refid=27");
+            HtmEle.LoadHtml(response);
+
+           
+            
+            List<string> tempList = new List<string>();
+            string temp;
+            Regex regex = new Regex("/groups/(\\d+)?refid=27");
+            foreach (HtmlNode element in HtmEle.DocumentNode.SelectNodes("//a")) {
+                temp = element.GetAttributeValue("href", "fasle");
+
+                if (regex.IsMatch(temp)) tempList.Add(regex.Match(temp).Groups[1].Value);
+            }
+
+            return tempList;
         }
 
         public Boolean loginOut() {
@@ -107,14 +129,13 @@ namespace AutoFB {
                 if (element.InnerText.Contains("登出")) {
                     string url = element.GetAttributeValue("href", "false");
                     if (url != "false") {
-                        url = "https://m.facebook.com" + urlTransfer(url);
+                        url = "https://m.facebook.com" + UrlTransfer(url);
                         response = DownloadString(url);
-                        return true;
                     }
-                    return false;
+                    break;
                 }
             }
-
+            CookieContainer = new System.Net.CookieContainer();
             return false;
         }
 
@@ -127,7 +148,6 @@ namespace AutoFB {
             }
             userName = regex.Match(response).Groups[1].Value.Split('（')[1].Split('）')[0];
             isLogin = true;
-            //id="mbasic_logout_button">登出（鄭智嘉）</a>
             return true;
         }
     }

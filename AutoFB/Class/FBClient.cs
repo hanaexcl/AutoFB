@@ -17,11 +17,12 @@ namespace AutoFB {
         private const string acceptLanguage = "zh-Hant-TW,zh-Hant;q=0.7,ja;q=0.3";
         private const string userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
         bool redirect;
+        private Uri ResponseUri;
         HtmlDocument HtmEle = new HtmlDocument();
 
         public FBClient() {
             this.redirect = true;
-            this.CookieContainer = new System.Net.CookieContainer();
+            //this.CookieContainer = new System.Net.CookieContainer();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             //ReadCookies();
         }
@@ -41,6 +42,7 @@ namespace AutoFB {
             this.Headers.Set("Accept-Encoding", acceptEncoding);
             this.Headers.Set("Accept-Language", acceptLanguage);
             this.Headers.Set("User-Agent", userAgent);
+            if (ResponseUri != null) this.Headers.Set("Referer", ResponseUri.ToString());
             HttpWebRequest request = base.GetWebRequest(address) as HttpWebRequest;
             request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 
@@ -56,6 +58,7 @@ namespace AutoFB {
 
         protected override WebResponse GetWebResponse(WebRequest request) {
             WebResponse webResponse = base.GetWebResponse(request);
+            this.ResponseUri = webResponse.ResponseUri;
             return webResponse;
         }
 
@@ -104,7 +107,7 @@ namespace AutoFB {
             }
         }
 
-        public string urlTransfer(string Uri) {
+        public string UrlTransfer(string Uri) {
             string ret = Uri;
             ret = ret.Replace("amp;", "");
 
