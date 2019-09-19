@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -6,69 +7,59 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace AutoFB
-{
-    partial class FBClient
-    {
+namespace AutoFB {
+    partial class FBClient {
         public string userName = "";
         public Boolean isLogin = false;
 
-        public Boolean loginFB(string ac, string pw)
-        {
+        public Boolean loginFB(string ac, string pw) {
             isLogin = false;
 
             string response = this.DownloadString("https://m.facebook.com/");
 
             Regex regex = new Regex("<input type=\"hidden\" name=\"lsd\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string lsd = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<input type=\"hidden\" name=\"jazoest\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string jazoest = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<input type=\"hidden\" name=\"m_ts\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string m_ts = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<input type=\"hidden\" name=\"li\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string li = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<input type=\"hidden\" name=\"try_number\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string try_number = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<input type=\"hidden\" name=\"unrecognized_tries\" value=\"([^\"]+)\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string unrecognized_tries = regex.Match(response).Groups[1].Value;
 
             regex = new Regex("<form method=\"post\" action=\"([^\"]+)\" class=\"([^\"]+)\" id=\"login_form\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             string url = regex.Match(response).Groups[1].Value;
 
-            url = "https://m.facebook.com" + url.Replace("&amp;", "&");
+            url = "https://m.facebook.com" + urlTransfer(url);
 
             NameValueCollection payload = new NameValueCollection();
             payload.Add("lsd", lsd);
@@ -85,18 +76,53 @@ namespace AutoFB
 
             ///login/save-device/cancel/?flow=interstitial_nux&amp;nux_source=regular_login
             regex = new Regex("<a href=\"([^\"]+)\" class=\"([^\"]+)\" target=\"_self\"");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             url = regex.Match(response).Groups[1].Value;
-            url = "https://m.facebook.com" + url.Replace("&amp;", "&");
+            url = "https://m.facebook.com" + urlTransfer(url);
 
             response = DownloadString(url);
 
             regex = new Regex("id=\"mbasic_logout_button\">([^\"]+)</a>");
-            if (!regex.IsMatch(response))
-            {
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            userName = regex.Match(response).Groups[1].Value.Split('（')[1].Split('）')[0];
+            isLogin = true;
+            //id="mbasic_logout_button">登出（鄭智嘉）</a>
+            return true;
+        }
+
+        public Boolean loginOut() {
+            string response = DownloadString("https://m.facebook.com/");
+            HtmEle.LoadHtml(response);
+
+            //If HtmEle.DocumentNode.SelectNodes("//table//tr") Is Nothing Then Return False
+            if (HtmEle.DocumentNode.SelectNodes("//a") is null) {
+                return false;
+            }
+
+            foreach (HtmlNode element in HtmEle.DocumentNode.SelectNodes("//a")) {
+                if (element.InnerText.Contains("登出")) {
+                    string url = element.GetAttributeValue("href", "false");
+                    if (url != "false") {
+                        url = "https://m.facebook.com" + urlTransfer(url);
+                        response = DownloadString(url);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        public Boolean checkLogin() {
+            string response = DownloadString("https://m.facebook.com/");
+
+            Regex regex = new Regex("id=\"mbasic_logout_button\">([^\"]+)</a>");
+            if (!regex.IsMatch(response)) {
                 return false;
             }
             userName = regex.Match(response).Groups[1].Value.Split('（')[1].Split('）')[0];
@@ -105,5 +131,4 @@ namespace AutoFB
             return true;
         }
     }
-
 }
