@@ -20,15 +20,15 @@ namespace AutoFB {
 
         private void Button1_Click(object sender, EventArgs e) {
             web.ReadCookies();
-            if (web.checkLogin()) {
+            if (web.CheckLogin()) {
                 if (MessageBox.Show("目前已入帳號：" + web.userName + "\n是否登入其他帳號", "訊息", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes) {
-                    web.loginOut();
+                    web.LoginOut();
                 } else {
                     return;
                 }
             }
 
-            web.loginFB(this.textBox1.Text, this.textBox2.Text);
+            web.LoginFB(this.textBox1.Text, this.textBox2.Text);
             if (web.isLogin) {
                 web.SaveCookies();
                 MessageBox.Show(web.userName);
@@ -48,13 +48,15 @@ namespace AutoFB {
         }
 
         private void Button4_Click(object sender, EventArgs e) {
-            foreach(string temp in web.getGroupList()) {
+            foreach(string temp in web.GetGroupList()) {
                 Console.Out.WriteLine(temp + "\n");
             }
+
+            //Console.Out.WriteLine(web.PostInGroup("再陪你玩呀!"));
         }
 
         private void Button5_Click(object sender, EventArgs e) {
-            if (web.checkLogin()) {
+            if (web.CheckLogin()) {
                 MessageBox.Show(web.userName);
             } else {
                 MessageBox.Show("登入失敗");

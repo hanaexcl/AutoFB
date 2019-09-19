@@ -13,7 +13,7 @@ namespace AutoFB {
         public Boolean isLogin = false;
 
         
-        public Boolean loginFB(string ac, string pw) {
+        public Boolean LoginFB(string ac, string pw) {
             isLogin = false;
 
             string response = this.DownloadString("https://m.facebook.com/");
@@ -98,16 +98,93 @@ namespace AutoFB {
 
         //public List<string> groupList = null;
 
-        public List<string> getGroupList() {
+        public bool PostInGroup(string context) {
+            string response = DownloadString("https://m.facebook.com/groups/1248359792000849?view=group&refid=18");
+
+            Regex regex = new Regex("<form method=\"post\" action=\"([^\"]+)\" class=\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string url = regex.Match(response).Groups[1].Value;
+            url = "https://m.facebook.com" + UrlTransfer(url);
+
+            regex = new Regex("<input type=\"hidden\" name=\"fb_dtsg\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string fb_dtsg = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"jazoest\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string jazoest = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"target\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string target = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"c_src\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string c_src = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"cwevent\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string cwevent = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"referrer\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string referrer = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"ctype\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string ctype = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"cver\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string cver = regex.Match(response).Groups[1].Value;
+
+
+            NameValueCollection payload = new NameValueCollection();
+            payload.Add("fb_dtsg", fb_dtsg);
+            payload.Add("jazoest", jazoest);
+            payload.Add("target", target);
+            payload.Add("c_src", c_src);
+            payload.Add("cwevent", cwevent);
+            payload.Add("referrer", referrer);
+            payload.Add("ctype", ctype);
+            payload.Add("cver", cver);
+            payload.Add("rst_icv", "");
+            payload.Add("xc_message", context);
+            payload.Add("view_post", "發佈");
+
+            response = UploadValues(url, payload);
+
+            //https://m.facebook.com/groups/1248359792000849?_rdr
+            return ResponseUri.ToString().Contains("groups");
+        }
+
+        public List<string> GetGroupList() {
             string response = DownloadString("https://m.facebook.com/groups/?seemore&refid=27");
             HtmEle.LoadHtml(response);
 
-           
-            
             List<string> tempList = new List<string>();
             string temp;
-            Regex regex = new Regex("/groups/(\\d+)?refid=27");
+            Regex regex = new Regex("/groups/(\\d+).refid=27");
             foreach (HtmlNode element in HtmEle.DocumentNode.SelectNodes("//a")) {
+
                 temp = element.GetAttributeValue("href", "fasle");
 
                 if (regex.IsMatch(temp)) tempList.Add(regex.Match(temp).Groups[1].Value);
@@ -116,7 +193,7 @@ namespace AutoFB {
             return tempList;
         }
 
-        public Boolean loginOut() {
+        public Boolean LoginOut() {
             string response = DownloadString("https://m.facebook.com/");
             HtmEle.LoadHtml(response);
 
@@ -139,7 +216,7 @@ namespace AutoFB {
             return false;
         }
 
-        public Boolean checkLogin() {
+        public Boolean CheckLogin() {
             string response = DownloadString("https://m.facebook.com/");
 
             Regex regex = new Regex("id=\"mbasic_logout_button\">([^\"]+)</a>");
