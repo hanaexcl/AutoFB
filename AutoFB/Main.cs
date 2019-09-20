@@ -48,11 +48,9 @@ namespace AutoFB {
         }
 
         private void Button4_Click(object sender, EventArgs e) {
-            foreach(string temp in web.GetGroupList()) {
-                Console.Out.WriteLine(temp + "\n");
-            }
-
-            //Console.Out.WriteLine(web.PostInGroup("再陪你玩呀!"));
+            //MessageBox.Show(DateTime.Now.Ticks.ToString("x"));
+            web.GetGroupList();
+            //Console.Out.WriteLine(web.PostInGroup("沒有人我開了呀!"));
         }
 
         private void Button5_Click(object sender, EventArgs e) {

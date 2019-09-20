@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using MimeKit;
 
 namespace AutoFB {
     public partial class FBClient : WebClient {
@@ -32,6 +33,14 @@ namespace AutoFB {
         }
 
 
+        public string UploadFiles() {
+            List<MimePart> mimeParts = new List<MimePart>();
+
+
+
+            return "";
+        }
+
         //public new byte[] UploadValues(string skey, NameValueCollection payload)
         //{
         //    return base.UploadValues(skey, payload);
@@ -41,10 +50,13 @@ namespace AutoFB {
             this.Headers.Set("Accept", accept);
             this.Headers.Set("Accept-Encoding", acceptEncoding);
             this.Headers.Set("Accept-Language", acceptLanguage);
+            Console.Write("###" + this.Headers.Get("User-Agent") + "###");
             this.Headers.Set("User-Agent", userAgent);
+            
             if (ResponseUri != null) this.Headers.Set("Referer", ResponseUri.ToString());
             HttpWebRequest request = base.GetWebRequest(address) as HttpWebRequest;
             request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+            request.KeepAlive = true;
 
             HttpWebRequest request2 = request as HttpWebRequest;
 
@@ -113,5 +125,6 @@ namespace AutoFB {
 
             return ret;
         }
+
     }
 }

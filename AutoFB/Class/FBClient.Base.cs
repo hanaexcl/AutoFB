@@ -172,8 +172,104 @@ namespace AutoFB {
 
             response = UploadValues(url, payload);
 
-            //https://m.facebook.com/groups/1248359792000849?_rdr
+            //待驗證
+            //一般留言成功
+            //url: https://m.facebook.com/groups/1248359792000849?_rdr
+            //<div id="groupMallNotices"></div>
+
+            //目前暫用一般
             return ResponseUri.ToString().Contains("groups");
+        }
+
+        public bool PostInGroup(string context, List<string> imgPath) {
+            string response = DownloadString("https://m.facebook.com/groups/1248359792000849?view=group&refid=18");
+
+            Regex regex = new Regex("<form method=\"post\" action=\"([^\"]+)\" class=\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string url = regex.Match(response).Groups[1].Value;
+            url = "https://m.facebook.com" + UrlTransfer(url);
+
+            regex = new Regex("<input type=\"hidden\" name=\"fb_dtsg\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string fb_dtsg = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"jazoest\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string jazoest = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"target\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string target = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"c_src\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string c_src = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"cwevent\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string cwevent = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"referrer\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string referrer = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"ctype\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string ctype = regex.Match(response).Groups[1].Value;
+
+            regex = new Regex("<input type=\"hidden\" name=\"cver\" value=\"([^\"]+)\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            string cver = regex.Match(response).Groups[1].Value;
+
+
+            NameValueCollection payload = new NameValueCollection();
+            payload.Add("fb_dtsg", fb_dtsg);
+            payload.Add("jazoest", jazoest);
+            payload.Add("target", target);
+            payload.Add("c_src", c_src);
+            payload.Add("cwevent", cwevent);
+            payload.Add("referrer", referrer);
+            payload.Add("ctype", ctype);
+            payload.Add("cver", cver);
+            payload.Add("rst_icv", "");
+            payload.Add("xc_message", "");
+            payload.Add("view_post", "相片");
+
+            response = UploadValues(url, payload);
+
+            if (!response.Contains("file1")) {
+                //轉跳上傳照片頁面失敗
+                return false;
+            }
+
+            regex = new Regex("<form method=\"post\" action=\"([^\"]+)\" enctype=\"");
+            if (!regex.IsMatch(response)) {
+                return false;
+            }
+            url = regex.Match(response).Groups[1].Value;
+            url = "https://m.facebook.com" + UrlTransfer(url);
+
+            
+
+            return true;
         }
 
         public List<string> GetGroupList() {
